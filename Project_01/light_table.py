@@ -195,5 +195,181 @@ def _setup(self):
 #end def
 
 #when button is ON, turn on program
-#every 1 second read all 5 ADCs (by turning the one you want to read on HIGH and the rest low)
-#when the photodiode changes, turn on corresponding LED
+def button_press(self, function=None):
+      """Button press
+             - Optional function to execute while waiting for the button to be pressed
+               - Returns the last value of the function when the button was pressed
+             - Waits for a full button press
+             - Returns the time the button was pressed as tuple
+      """
+      button_press_time            = 0.0                 # Time button was pressed (in seconds)
+      ret_val                      = None                # Optional return value for provided function
+
+      # Optinally execute function pointer that is provided
+      #   - This is so that function is run at least once in case of a quick button press
+      if function is not None:
+          ret_val = function()
+          
+      # Wait for button press
+      while(GPIO.input(self.button) == 1):
+          # Optinally execute function pointer that is provided
+          if function is not None:
+              ret_val = function()
+          
+          # Sleep for a short period of time to reduce CPU load
+          time.sleep(0.1)
+
+      # Record time
+      button_press_time = time.time()
+
+      # Wait for button release
+      while(GPIO.input(self.button) == 0):
+          # Sleep for a short period of time to reduce CPU load
+          time.sleep(0.1)
+
+      # Compute button press time
+      button_press_time = time.time() - button_press_time
+
+      # Return button press time and optionally ret_val
+      if function is not None:
+          return (button_press_time, ret_val)
+      else:
+          return (button_press_time)
+
+  # End def
+
+#Check analog value
+
+def show_analog_value(self):
+        """Show the analog value on the screen:
+               - Read raw analog value
+               - Divide by 4 (remove two LSBs)
+               - Display value
+               - Return value
+        """
+        
+        # Read raw value from ADC
+        value = ADC.read_raw(self.analog_in)
+        
+        # Divide value by 8
+        value = int(value // 8)
+        
+        # Update display (must be an integer)
+        self.display.update(value)
+        
+        # Return value
+        return value
+#End def
+
+#Read all 5 ADCs (by turning the one you want to read on HIGH and the rest low)
+
+	def run(self):
+		#Read all 5 ADCs (by turning the one you want to read on HIGH and the rest low) and 
+		#turn on light in the row with an object on it
+
+		# Set all ADCs to low
+		GPIO.output(self.ADC1, GPIO.LOW)
+		GPIO.output(self.ADC2, GPIO.LOW)
+		GPIO.output(self.ADC3, GPIO.LOW)
+		GPIO.output(self.ADC4, GPIO.LOW)
+		GPIO.output(self.ADC5, GPIO.LOW)
+
+		# Check ADC 1
+		GPIO.output(self.ADC1, GPIO.HIGH) 
+		
+		value = ADC.read_raw(self.analog_in)
+
+		if value < 1000: #if the photodiodes connected to that ADC detects darkness, light up LEDS in the row
+			GPIO.output(self.led_1x1, GPIO.HIGH) 
+			GPIO.output(self.led_1x2, GPIO.HIGH) 
+			GPIO.output(self.led_1x3, GPIO.HIGH) 
+			GPIO.output(self.led_1x4, GPIO.HIGH) 
+			GPIO.output(self.led_1x5, GPIO.HIGH) 
+		else: 
+			pass
+
+		GPIO.output(self.ADC1, GPIO.LOW) #turn back to low
+
+		# Check ADC 2
+		GPIO.output(self.ADC2, GPIO.HIGH) 
+		value = ADC.read_raw(self.analog_in)
+
+		if value < 1000: #if the photodiodes connected to that ADC detects darkness, light up LEDS in the row
+			GPIO.output(self.led_1x1, GPIO.HIGH) 
+			GPIO.output(self.led_1x2, GPIO.HIGH) 
+			GPIO.output(self.led_1x3, GPIO.HIGH) 
+			GPIO.output(self.led_1x4, GPIO.HIGH) 
+			GPIO.output(self.led_1x5, GPIO.HIGH) 
+		else: 
+			pass
+
+		GPIO.output(self.ADC2, GPIO.LOW) #turn back to low
+
+		# Check ADC 3
+		GPIO.output(self.ADC3, GPIO.HIGH) 
+		value = ADC.read_raw(self.analog_in)
+
+		if value < 1000: #if the photodiodes connected to that ADC detects darkness, light up LEDS in the row
+			GPIO.output(self.led_1x1, GPIO.HIGH) 
+			GPIO.output(self.led_1x2, GPIO.HIGH) 
+			GPIO.output(self.led_1x3, GPIO.HIGH) 
+			GPIO.output(self.led_1x4, GPIO.HIGH) 
+			GPIO.output(self.led_1x5, GPIO.HIGH) 
+		else: 
+			pass
+
+		GPIO.output(self.ADC3, GPIO.LOW) #turn back to low
+
+		# Check ADC 4
+		GPIO.output(self.ADC4, GPIO.HIGH) 
+		value = ADC.read_raw(self.analog_in)
+
+		if value < 1000: #if the photodiodes connected to that ADC detects darkness, light up LEDS in the row
+			GPIO.output(self.led_1x1, GPIO.HIGH) 
+			GPIO.output(self.led_1x2, GPIO.HIGH) 
+			GPIO.output(self.led_1x3, GPIO.HIGH) 
+			GPIO.output(self.led_1x4, GPIO.HIGH) 
+			GPIO.output(self.led_1x5, GPIO.HIGH) 
+		else: 
+			pass
+
+		GPIO.output(self.ADC4, GPIO.LOW) #turn back to low
+
+		# Check ADC 5
+		GPIO.output(self.ADC5, GPIO.HIGH) 
+		value = ADC.read_raw(self.analog_in)
+
+		if value < 100: #if the photodiodes connected to that ADC detects darkness, light up LEDS in the row
+			GPIO.output(self.led_1x1, GPIO.HIGH) 
+			GPIO.output(self.led_1x2, GPIO.HIGH) 
+			GPIO.output(self.led_1x3, GPIO.HIGH) 
+			GPIO.output(self.led_1x4, GPIO.HIGH) 
+			GPIO.output(self.led_1x5, GPIO.HIGH) 
+		else: 
+			pass
+
+		GPIO.output(self.ADC5, GPIO.LOW) #turn back to low
+
+	#end def
+
+
+# End class
+
+
+# ------------------------------------------------------------------------
+# Main script
+# ------------------------------------------------------------------------
+
+if __name__ == '__main__':
+
+    print("Program Start")
+
+    # Create instantiation of the lock
+    light_table = lighttable()
+
+    try:
+        # Run the lock
+        light_table.run()
+
+    print("Program Complete")
+
